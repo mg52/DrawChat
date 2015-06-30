@@ -1,0 +1,260 @@
+<!doctype html>
+<html lang="en">
+<head>
+    <title>Draw Chat</title>
+    <style>
+        body{
+            position: fixed;
+            margin: 0px;
+            padding: 0px;
+            width: 100%;
+        }
+        canvas {
+            display: block;
+            position: fixed;
+            border: 3px solid #434e8b;
+            margin: left;
+            top: 100px;
+            bottom: 0;
+            left: 50px;
+            right: 0;
+            cursor:default;
+        }
+        #clear_button{
+            position:relative;
+            margin: 0;
+        }
+        #send_button{
+            position:relative;
+            margin: 0;
+        }
+        #welcome{
+            font-family:Calibri;
+            position: relative;
+            left: 50px;
+        }
+        #Name{
+            font-family:Calibri;
+            position: relative;
+            left: 50px;
+        }
+        #change_name{
+            font-family:Calibri;
+            position: relative;
+            left: 50px;
+        }
+        #count{
+            font-family:Calibri;
+            position: relative;
+            left: 50px;
+        }
+        #send_button{
+            font-family:Calibri;
+            position: relative;
+            left: 50px;
+        }
+        #clear_button{
+            font-family:Calibri;
+            position: relative;
+            left: 50px;
+        }
+        #message_sent{
+            font-family:Calibri;
+            position: relative;
+            top:325px;
+            left: 50px;
+        }
+
+    </style>
+    <script src="/socket.io/socket.io.js"></script>
+</head>
+<body>
+<div id="welcome">Welcome</div>
+<input type="text" id="Name">
+<button id="change_name">Change Name</button>
+<br><div id="count">Number of Users: </div>
+<button id="send_button">Send</button>
+<button id="clear_button">Erase</button>
+<div id="message_sent">Message Send Status: </div>
+
+<script>
+    window.onload = function() {
+        var WIDTH = 505, HEIGHT = 300, canvas, ctx, clicked = false;
+        canvas = document.createElement("canvas");
+        canvas.width = WIDTH;
+        canvas.height = HEIGHT;
+        ctx = canvas.getContext("2d");
+        document.body.appendChild(canvas);
+        var mparray = [];
+        var count = document.getElementById("count");
+        var welcome = document.getElementById("welcome");
+        var change_name = document.getElementById("change_name");
+        var message_sent = document.getElementById("message_sent");
+        var socket = io();
+        //var socket = io.connect("192.168.0.13:5000");
+        socket.on('welcome', function (data) {
+            welcome.innerHTML = "Welcome " + data.name;
+        });
+        socket.on('usercount', function (data) {
+            count.innerHTML = "Number of Users: " + data.user_count;
+        });
+        socket.on("send_draw", function (data) {
+            ctx.fillStyle = "#cde0c0";
+            ctx.fillRect(255, 0, 250, 300);
+            ctx.fillStyle = "#8B2120";
+            ctx.font = "bold 18px Calibri";
+            ctx.fillText("Friend Name: " + data.username, 260, 15);
+            ctx.beginPath();
+            ctx.moveTo((data.drawarray[0] + 255), (data.drawarray[1]));
+            for(var i = 2;i<(data.drawarray).length;i+=2){
+                if(data.drawarray[i] == 999){
+                    ctx.closePath();
+                    ctx.moveTo((data.drawarray[i+2] + 255), (data.drawarray[i+3]));
+                    i=i+2;
+                    ctx.beginPath();
+                    continue;
+                }
+                ctx.lineTo((data.drawarray[i] + 255), (data.drawarray[i+1]));
+                ctx.stroke();
+            }
+            ctx.closePath();
+            socket.emit("message_sent",{sentuserid:data.userid});
+        });
+        socket.on("message_sent_correctly",function(data){
+            try {
+                socket.emit("check_id", {ci: data.msc});
+            }
+            catch(err){
+                message_sent.innerHTML = "Error: " + err;
+            }
+        });
+        socket.on("id_checked",function(){
+            try{
+             message_sent.innerHTML = "Message Send Status: The message has been sent successfully!";
+             }
+             catch(err){
+             message_sent.innerHTML = "Error: " + err;
+             }
+        });
+        if (detectmob() == 0) {
+            canvas.addEventListener("mousedown", function tik(event) {
+                var mousePos = getMousePos(canvas, event);
+                if (mousePos.x < 245) {
+                    clicked = true;
+                    ctx.beginPath();
+                    ctx.moveTo(mousePos.x, mousePos.y);
+                }
+            });
+            canvas.addEventListener("mouseup", function tik(event) {
+                clicked = false;
+                ctx.closePath();
+                mparray.push(999);
+                mparray.push(999);
+            });
+            canvas.addEventListener("mousemove", function tik(event) {
+                var mousePos = getMousePos(canvas, event);
+                if (mousePos.x < 245)
+                    if (clicked) {
+                        mparray.push(mousePos.x,mousePos.y);
+                        ctx.lineTo(mousePos.x, mousePos.y);
+                        ctx.stroke();
+                    }
+            });
+        }
+        else {
+            canvas.addEventListener("touchstart", function tik(event) {
+                var mousePos = getTouchPos(event);
+                if (mousePos.x < 245) {
+                    clicked = true;
+                    ctx.beginPath();
+                    ctx.moveTo(mousePos.x, mousePos.y);
+                }
+            });
+            canvas.addEventListener("touchend", function tik(event) {
+                clicked = false;
+                ctx.closePath();
+                mparray.push(999);
+                mparray.push(999);
+            });
+            canvas.addEventListener("touchmove", function tik(event) {
+                var mousePos = getTouchPos(event);
+                if (mousePos.x < 245)
+                    if (clicked) {
+                        mparray.push(mousePos.x,mousePos.y);
+                        ctx.lineTo(mousePos.x, mousePos.y);
+                        ctx.stroke();
+                    }
+            });
+        }
+        function init() {
+            if(detectmob()==0) {
+                document.getElementById("clear_button").addEventListener("click", erase);
+                document.getElementById("send_button").addEventListener("click", send_image);
+                document.getElementById("change_name").addEventListener("click", get_name);
+            }
+            else{
+                document.getElementById("clear_button").addEventListener("touchstart", erase);
+                document.getElementById("send_button").addEventListener("touchstart", send_image);
+                document.getElementById("change_name").addEventListener("touchstart", get_name);
+            }
+        }
+        function draw() {
+            ctx.fillStyle = "#cde0c0";
+            ctx.fillRect(0, 0, WIDTH, HEIGHT);
+            ctx.fillStyle = "#434e8b";
+            ctx.fillRect(250, 0, 5, 500);
+            ctx.fillStyle = "#8B2120";
+            ctx.font = "bold 18px Calibri";
+            ctx.fillText("You", 5, 15);
+            ctx.fillText("Friend Name:", 260, 15);
+        }
+        function erase() {
+            ctx.fillStyle = "#cde0c0";
+            ctx.fillRect(0, 0, 250, HEIGHT);
+            ctx.fillStyle = "#8B2120";
+            ctx.font = "bold 18px Calibri";
+            ctx.fillText("You", 5,15);
+            mparray = [];
+        }
+        function get_name(){
+            socket.emit("get_name" , {username: document.getElementById("Name").value});
+        }
+        function send_image() {
+            get_name();
+            socket.emit("send_mouse_pos",{mouse_pos:mparray});
+        }
+        function getMousePos(canvas, evt) {
+            var rect = canvas.getBoundingClientRect();
+            return {
+                x: evt.clientX - rect.left,
+                y: evt.clientY - rect.top
+            };
+        }
+        function getTouchPos(evt) {
+            var touchobj = evt.changedTouches[0]
+            return {
+                x: touchobj.clientX - 50,
+                y: touchobj.clientY - 100
+            };
+        }
+        function detectmob() {
+            if (navigator.userAgent.match(/Android/i)
+                    || navigator.userAgent.match(/webOS/i)
+                    || navigator.userAgent.match(/iPhone/i)
+                    || navigator.userAgent.match(/iPad/i)
+                    || navigator.userAgent.match(/iPod/i)
+                    || navigator.userAgent.match(/BlackBerry/i)
+                    || navigator.userAgent.match(/Windows Phone/i)
+            ) {
+                return true;
+            }
+            else {
+                return false;
+            }
+        }
+        init();
+        draw();
+    }
+</script>
+</body>
+</html>

@@ -1,0 +1,10 @@
+{
+    "name": "mg52",
+    "version": "0.0.1",
+    "description": "mg52",
+    "dependencies": {
+        "socket.io": "latest",
+        "express": "latest"
+    },
+    "author": "mg52"
+}

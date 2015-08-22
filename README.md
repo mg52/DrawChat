@@ -1,6 +1,6 @@
 # DrawChat
 
-This app is for drawing and sending that drawing to other users.
+This app is for drawing and sending that drawing to other users. I built this app using NodeJS, SocketIO.
 
 I uploaded this project on https://musdraw.herokuapp.com/
 You need to open at least 2 pages to send your drawing.

@@ -14,54 +14,82 @@
             position: fixed;
             border: 3px solid #434e8b;
             margin: left;
-            top: 100px;
+            top: 150px;
             bottom: 0;
             left: 50px;
             right: 0;
             cursor:default;
         }
-        #clear_button{
-            position:relative;
-            margin: 0;
-        }
-        #send_button{
-            position:relative;
-            margin: 0;
-        }
         #welcome{
             font-family:Calibri;
-            position: relative;
+            position: fixed;
             left: 50px;
+            top:10px;
         }
         #Name{
             font-family:Calibri;
-            position: relative;
+            position: fixed;
             left: 50px;
-        }
-        #change_name{
-            font-family:Calibri;
-            position: relative;
-            left: 50px;
+            top: 30px;
         }
         #count{
             font-family:Calibri;
-            position: relative;
+            position: fixed;
             left: 50px;
+            top: 55px;
+        }
+        #change_name{
+            font-family:Calibri;
+            position: fixed;
+            top:90px;
+            left: 50px;
+            width: 100px;
+            height: 50px;
+            margin:          0;
+            border: 1px solid #000;
+            background: #79a3c0;
+            opacity : 1;
+            text-align: center;
+            vertical-align: middle;
+            line-height: 50px;
+            cursor:default;
         }
         #send_button{
             font-family:Calibri;
-            position: relative;
-            left: 50px;
+            position: fixed;
+            top:90px;
+            left: 160px;
+            width: 100px;
+            height: 50px;
+            margin:          0;
+            border: 1px solid #000;
+            background: #79a3c0;
+            opacity : 1;
+            text-align: center;
+            vertical-align: middle;
+            line-height: 50px;
+            cursor:default;
         }
         #clear_button{
             font-family:Calibri;
-            position: relative;
-            left: 50px;
+            position: fixed;
+            top:90px;
+            left: 270px;
+            width: 100px;
+            height: 50px;
+            margin:          0;
+            border: 1px solid #000;
+            background: #79a3c0;
+            opacity : 1;
+            text-align: center;
+            vertical-align: middle;
+            line-height: 50px;
+            cursor:default;
         }
         #message_sent{
             font-family:Calibri;
-            position: relative;
-            top:325px;
+            position: fixed;
+            top:460px;
             left: 50px;
         }
 
@@ -71,10 +99,10 @@
 <body>
 <div id="welcome">Welcome</div>
 <input type="text" id="Name">
-<button id="change_name">Change Name</button>
+<div id="change_name">Change Name</div>
 <br><div id="count">Number of Users: </div>
-<button id="send_button">Send</button>
-<button id="clear_button">Erase</button>
+<div id="send_button">Send</div>
+<div id="clear_button">Erase</div>
 <div id="message_sent">Message Send Status: </div>
 
 <script>
@@ -93,7 +121,7 @@
         var socket = io();
         //var socket = io.connect("192.168.0.13:5000");
         socket.on('welcome', function (data) {
-            welcome.innerHTML = "Welcome " + data.name;
+            welcome.innerHTML = "Welcome ID: " + data.wid +", Name: " + data.wname;
         });
         socket.on('usercount', function (data) {
             count.innerHTML = "Number of Users: " + data.user_count;
@@ -139,7 +167,7 @@
         if (detectmob() == 0) {
             canvas.addEventListener("mousedown", function tik(event) {
                 var mousePos = getMousePos(canvas, event);
-                if (mousePos.x < 245) {
+                if (mousePos.x < 250 && mousePos.x > 0 && mousePos.y < 300 && mousePos.y > 0) {
                     clicked = true;
                     ctx.beginPath();
                     ctx.moveTo(mousePos.x, mousePos.y);
@@ -153,7 +181,7 @@
             });
             canvas.addEventListener("mousemove", function tik(event) {
                 var mousePos = getMousePos(canvas, event);
-                if (mousePos.x < 245)
+                if (mousePos.x < 250 && mousePos.x > 0 && mousePos.y < 300 && mousePos.y > 0)
                     if (clicked) {
                         mparray.push(mousePos.x,mousePos.y);
                         ctx.lineTo(mousePos.x, mousePos.y);
@@ -164,7 +192,7 @@
         else {
             canvas.addEventListener("touchstart", function tik(event) {
                 var mousePos = getTouchPos(event);
-                if (mousePos.x < 245) {
+                if (mousePos.x < 250 && mousePos.x > 0 && mousePos.y < 300 && mousePos.y > 0) {
                     clicked = true;
                     ctx.beginPath();
                     ctx.moveTo(mousePos.x, mousePos.y);
@@ -178,7 +206,7 @@
             });
             canvas.addEventListener("touchmove", function tik(event) {
                 var mousePos = getTouchPos(event);
-                if (mousePos.x < 245)
+                if (mousePos.x < 250 && mousePos.x > 0 && mousePos.y < 300 && mousePos.y > 0)
                     if (clicked) {
                         mparray.push(mousePos.x,mousePos.y);
                         ctx.lineTo(mousePos.x, mousePos.y);
@@ -220,6 +248,7 @@
             socket.emit("get_name" , {username: document.getElementById("Name").value});
         }
         function send_image() {
+            message_sent.innerHTML = "Message Send Status: Sending..."
             get_name();
             socket.emit("send_mouse_pos",{mouse_pos:mparray});
         }

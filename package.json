@@ -1,10 +1,10 @@
 {
-    "name": "mg52",
+    "name": "mg52 - Mussky",
     "version": "0.0.1",
-    "description": "mg52",
+    "description": "Draw Chat",
     "dependencies": {
         "socket.io": "latest",
         "express": "latest"
     },
-    "author": "mg52"
+    "author": "Mussky"
 }

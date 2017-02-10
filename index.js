@@ -48,3 +48,4 @@ var removeUser = function() {
     user_count -= 1;
     io.sockets.emit("usercount", { user_count: user_count });
 }
+ 
